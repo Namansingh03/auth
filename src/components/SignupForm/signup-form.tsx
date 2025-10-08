@@ -12,8 +12,10 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { FaGoogle, FaGithub } from "react-icons/fa";
 
 export function SignupForm({
   className,
@@ -23,18 +25,27 @@ export function SignupForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
+          <CardTitle className="text-xl">Welcome to App Name</CardTitle>
           <CardDescription>
-            Enter your email below to create your account
+            create your new account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                <Input id="name" type="text" placeholder="John Doe" required />
+                <Button variant="outline" type="button">
+                  <FaGoogle/>
+                  Login with Google
+                </Button>
+                <Button variant="outline" type="button">
+                  <FaGithub/>
+                  Login with Github
+                </Button>
               </Field>
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+                Or continue with
+              </FieldSeparator>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
@@ -45,26 +56,21 @@ export function SignupForm({
                 />
               </Field>
               <Field>
-                <Field className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input id="password" type="password" required />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="confirm-password">
-                      Confirm Password
-                    </FieldLabel>
-                    <Input id="confirm-password" type="password" required />
-                  </Field>
-                </Field>
-                <FieldDescription>
-                  Must be at least 8 characters long.
-                </FieldDescription>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                </div>
+                <Input id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="confirm-password">Confrim Password</FieldLabel>
+                </div>
+                <Input id="confirm-password" type="password" required />
+              </Field>
+              <Field>
+                <Button type="submit">Sign up</Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <a href="#">Sign in</a>
+                  already have an account <a href="/login">Sign in</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>
