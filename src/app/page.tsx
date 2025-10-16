@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="w-full h-screen flex items-center justify-center">
-      <Link href={"/login"}>
+      <Link href={"/Signin"}>
       <Button variant={"outline"}>
         Login
       </Button>
