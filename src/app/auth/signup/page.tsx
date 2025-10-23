@@ -1,14 +1,18 @@
-"use client"
+"use client";
 
-import React from 'react'
-import SignUpForm from '@/components/auth/signup-form/page'
+import React from "react";
+import SignUpForm from "@/components/auth/signup-form/page";
+import AnimatedBlobsBackground from "@/utils/animatedBlobs";
 
 const SignUpPage = () => {
   return (
-    <div className='h-screen w-full flex items-center justify-center bg-blue-950'>
-        <SignUpForm/>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background z-1">
+      <div className="relative z-10 w-full max-w-md px-4">
+      <AnimatedBlobsBackground />
+        <SignUpForm />
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default SignUpPage
+export default SignUpPage;
