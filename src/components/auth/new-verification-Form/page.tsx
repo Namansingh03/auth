@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useTransition } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,10 +22,21 @@ const VerificationForm = () => {
   const token = searchParams.get("token");
   const email = searchParams.get("email");
   const formatedDateAndTime = getFormattedDateTime();
+  const router = useRouter();
+
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const onSubmit = useCallback(() => {
     if (!token) {
-      toast.error("misssing token", { description: formatedDateAndTime });
+      toast.error("Missing token", { description: formatedDateAndTime });
       return;
     }
 
@@ -33,35 +44,49 @@ const VerificationForm = () => {
       .then((res) => {
         if (res.success) {
           toast.success(res.message, { description: formatedDateAndTime });
+          router.push("/dashboard"); 
         } else {
           toast.error(res.message, { description: formatedDateAndTime });
         }
       })
       .catch(() => {
-        toast.error("something went wrong while confirm email", {
+        toast.error("Something went wrong while confirming email", {
           description: formatedDateAndTime,
         });
       });
-  }, [token, formatedDateAndTime]);
+  }, [token, formatedDateAndTime, router]);
 
   useEffect(() => {
     onSubmit();
   }, [onSubmit]);
 
-  const ResendVerifiactionEmail = async () => {
-    if (!email) {
-      toast.error("Missing Email", { description: formatedDateAndTime });
-    }
-    else{
+  const handleActionClick = async (type: "resend" | "otp") => {
+    if (cooldown > 0) return; 
+
+    if (type === "resend") {
+      if (!email) {
+        toast.error("Missing Email", { description: formatedDateAndTime });
+        return;
+      }
+
       await ResendSignUpVerificationEmail(email)
-      .then((res) => {
-        if(res.success){
-          toast.success(res.message , { description : formatedDateAndTime})
-        }
-        else{
-          toast.error("Something wnet wrong while resend email", { description : formatedDateAndTime})
-        }
-      })
+        .then((res) => {
+          if (res.success) {
+            toast.success(res.message, { description: formatedDateAndTime });
+            setCooldown(60);
+          } else {
+            toast.error("Something went wrong while resending email", {
+              description: formatedDateAndTime,
+            });
+          }
+        })
+        .catch(() => {
+          toast.error("Something went wrong while resending email", {
+            description: formatedDateAndTime,
+          });
+        });
+    } else if (type === "otp") {
+      router.push("/auth/verify-otp")
     }
   };
 
@@ -70,29 +95,35 @@ const VerificationForm = () => {
       <CardHeader className="w-full flex flex-col items-center justify-center">
         <CardTitle className="font-semibold">App logo</CardTitle>
         <CardDescription className="text-2xl font-bold text-black">
-          Verifiaction Email Sent
+          Verification Email Sent
         </CardDescription>
         <p className="text-muted-foreground">
-          We have sent a Verifiaction email link to your email
+          We have sent a verification email link to your email
         </p>
       </CardHeader>
       <CardContent className="w-full flex flex-col items-center gap-y-5">
         <p className="text-center w-full">
-          check your email and click on the verify email button to verify your
+          Check your email and click on the verify email button to verify your
           account
         </p>
         <MdMarkEmailRead className="w-10 h-10 text-blue-600" />
       </CardContent>
       <CardFooter className="w-full flex justify-between">
         <Button
-          onClick={ResendVerifiactionEmail}
+          onClick={() => handleActionClick("resend")}
           className="text-blue-700"
           variant={"link"}
+          disabled={cooldown > 0}
         >
-          Resend
+          {cooldown > 0 ? `Resend (${cooldown}s)` : "Resend"}
         </Button>
-        <Button className="text-blue-700" variant={"link"}>
-          verify using otp
+        <Button
+          onClick={() => handleActionClick("otp")}
+          className="text-blue-700"
+          variant={"link"}
+          disabled={cooldown > 0}
+        >
+          {cooldown > 0 ? `Verify using OTP (${cooldown}s)` : "Verify using OTP"}
         </Button>
       </CardFooter>
     </Card>

@@ -36,7 +36,6 @@ export const newVerifiactionAction = async (token : string) => {
     where : { id : existingToken.id }
    })
 
-   NextResponse.redirect('/dashboard')
    return CreateResponse(true ,null, "Email verified successfully")
 
 }
