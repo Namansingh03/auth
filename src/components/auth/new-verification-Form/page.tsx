@@ -16,6 +16,7 @@ import { newVerifiactionAction } from "@/app/api/auth/new-verification/route";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getFormattedDateTime } from "@/utils/getFormattedDateandTime";
 import { ResendSignUpVerificationEmail } from "./resndSignUpVerificationEmail";
+import { SendVerificationOtp } from "./SendVerificationOtp";
 
 const VerificationForm = () => {
   const searchParams = useSearchParams();
@@ -91,7 +92,17 @@ const VerificationForm = () => {
       if (!email) {
         toast.error("Email doen't exist", { description: formatedDateAndTime });
       } else {
-        setCooldown(60)
+        await SendVerificationOtp(email)
+        .then((res) => {
+          if(!res.success){
+             setCooldown(60)
+             toast.error(res.message, { description : formatedDateAndTime })
+          }
+          else{
+            toast.success(res.message, { description : formatedDateAndTime })
+            router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}`)
+          }
+        })
       }
     }
   };

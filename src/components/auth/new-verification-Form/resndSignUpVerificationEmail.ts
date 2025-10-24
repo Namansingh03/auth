@@ -6,7 +6,7 @@ import { generatedVerificationToken } from "@/utils/getGenratedToken"
 
 export async function ResendSignUpVerificationEmail(email : string) {
     const verifiactionToken = await generatedVerificationToken(email)
-    await SendSignUpVerificationEmail(verifiactionToken.email , verifiactionToken.token)
+    const emailSent = await SendSignUpVerificationEmail(verifiactionToken.email , verifiactionToken.token)
 
-    return CreateResponse(true , "Email sent successfully")
+    return CreateResponse(emailSent.success , null , emailSent.message)
 }
