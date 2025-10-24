@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcrypt"
 import z from "zod"
 import { SignUpSchema } from "@/schemas/authSchema"
+import { generatedVerificationToken } from "@/utils/getGenratedToken"
+import { SendSignUpVerificationEmail } from "@/emails/SendVerificationEmail"
 
 export default async function SignUpAction(formData : z.infer<typeof SignUpSchema>) {
     const validatedFields = await SignUpSchema.safeParse(formData)
@@ -36,9 +38,8 @@ export default async function SignUpAction(formData : z.infer<typeof SignUpSchem
         }
     })
 
-    return CreateResponse(
-        true,
-        null,
-        "User created successfully"
-    )
+    const verifiactionToken = await generatedVerificationToken(email)
+    await SendSignUpVerificationEmail(verifiactionToken.email , verifiactionToken.token);
+ 
+    return CreateResponse(true , null , "Verification email sent successfully")
 }

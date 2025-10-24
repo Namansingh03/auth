@@ -28,9 +28,11 @@ import SocialsForm from "../Socials/page";
 import SignUpAction from "./SignUpAction";
 import { getFormattedDateTime } from "@/utils/getFormattedDateandTime";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const SignUpForm = () => {
-
+  
+  const router = useRouter()
   const [isPending, startTransition] = useTransition();
   const DateAndTime = getFormattedDateTime()
 
@@ -54,6 +56,7 @@ const SignUpForm = () => {
         else{
           toast.success(res.message, { description : DateAndTime})
           form.reset()
+          router.push("/auth/verification")
         }
        })
     })
