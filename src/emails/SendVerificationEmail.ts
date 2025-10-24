@@ -1,6 +1,6 @@
 import { resend } from "@/lib/resend";
 
-const url = process.env.AUTH_URL;
+const url = process.env.NEXT_AUTH_URL;
 
 export const SendSignUpVerificationEmail = async (email: string, token: string) => {
 

@@ -56,7 +56,6 @@ const SignUpForm = () => {
         else{
           toast.success(res.message, { description : DateAndTime})
           form.reset()
-          router.push("/auth/verification")
         }
        })
     })
