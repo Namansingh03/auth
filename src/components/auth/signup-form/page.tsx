@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useTransition, useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,7 +12,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,8 +25,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { SignUpSchema } from "@/schemas/authSchema";
 import SocialsForm from "../Socials/page";
+import SignUpAction from "./SignUpAction";
+import { getFormattedDateTime } from "@/utils/getFormattedDateandTime";
+import { toast } from "sonner";
 
 const SignUpForm = () => {
+
+  const [isPending, startTransition] = useTransition();
+  const DateAndTime = getFormattedDateTime()
+
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
@@ -37,8 +43,20 @@ const SignUpForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof SignUpSchema>) {
-    console.log(values.email, values.password, values.confirmPassword);
+  function onSubmit(formData: z.infer<typeof SignUpSchema>) {
+    console.log(formData);
+    startTransition(() => {
+       SignUpAction(formData)
+       .then((res) => {
+        if(!res.success){
+          toast.error(res.message, { description : DateAndTime})
+        }
+        else{
+          toast.success(res.message, { description : DateAndTime})
+          form.reset()
+        }
+       })
+    })
   }
 
   return (
@@ -64,6 +82,7 @@ const SignUpForm = () => {
             <FormField
               control={form.control}
               name="email"
+              disabled={isPending}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
@@ -81,6 +100,7 @@ const SignUpForm = () => {
             <FormField
               control={form.control}
               name="password"
+              disabled={isPending}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
@@ -98,6 +118,7 @@ const SignUpForm = () => {
             <FormField
               control={form.control}
               name="confirmPassword"
+              disabled={isPending}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
@@ -112,7 +133,10 @@ const SignUpForm = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" size={"sm"}>
+            <Button
+            disabled={isPending} 
+            type="submit" 
+            size={"sm"}>
               Submit
             </Button>
           </form>

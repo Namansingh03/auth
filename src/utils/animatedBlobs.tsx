@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -6,7 +6,8 @@ import { motion } from "framer-motion";
 const blobs = [
   {
     size: "w-80 h-80",
-    gradient: "from-pink-500 to-yellow-500",
+    gradientLight: "from-pink-400 to-yellow-400",
+    gradientDark: "from-pink-700 to-yellow-600",
     top: "10%",
     left: "15%",
     duration: 12,
@@ -15,7 +16,8 @@ const blobs = [
   },
   {
     size: "w-96 h-96",
-    gradient: "from-blue-500 to-purple-500",
+    gradientLight: "from-blue-400 to-purple-400",
+    gradientDark: "from-blue-800 to-purple-700",
     top: "30%",
     left: "60%",
     duration: 10,
@@ -24,7 +26,8 @@ const blobs = [
   },
   {
     size: "w-80 h-80",
-    gradient: "from-green-400 to-teal-500",
+    gradientLight: "from-green-300 to-teal-400",
+    gradientDark: "from-green-700 to-teal-600",
     top: "50%",
     left: "25%",
     duration: 14,
@@ -33,7 +36,8 @@ const blobs = [
   },
   {
     size: "w-64 h-64",
-    gradient: "from-red-400 to-pink-600",
+    gradientLight: "from-red-300 to-pink-500",
+    gradientDark: "from-red-700 to-pink-700",
     top: "70%",
     left: "70%",
     duration: 11,
@@ -44,11 +48,18 @@ const blobs = [
 
 const AnimatedBlobsBackground = () => {
   return (
-    <div className="fixed top-0 left-0 w-full h-full overflow-hidden z-[-1]">
+    <div className="fixed inset-0 w-full h-full overflow-hidden -z-10">
       {blobs.map((blob, index) => (
         <motion.div
           key={index}
-          className={`absolute ${blob.size} bg-linear-to-r ${blob.gradient} rounded-full mix-blend-multiply filter blur-3xl opacity-70`}
+          className={`absolute ${blob.size} 
+            bg-linear-to-r 
+            ${blob.gradientLight} 
+            dark:${blob.gradientDark} 
+            rounded-full 
+            mix-blend-multiply 
+            filter blur-3xl 
+            opacity-60 dark:opacity-40`}
           style={{ top: blob.top, left: blob.left }}
           animate={{
             x: blob.x,
