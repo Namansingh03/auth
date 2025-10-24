@@ -15,36 +15,55 @@ import { toast } from "sonner";
 import { newVerifiactionAction } from "@/app/api/auth/new-verification/route";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getFormattedDateTime } from "@/utils/getFormattedDateandTime";
+import { ResendSignUpVerificationEmail } from "./resndSignUpVerificationEmail";
 
 const VerificationForm = () => {
-
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const formatedDateAndTime = getFormattedDateTime()
+  const email = searchParams.get("email");
+  const formatedDateAndTime = getFormattedDateTime();
 
   const onSubmit = useCallback(() => {
     if (!token) {
-      toast.error("misssing token", { description : formatedDateAndTime} )
+      toast.error("misssing token", { description: formatedDateAndTime });
       return;
     }
 
     newVerifiactionAction(token)
       .then((res) => {
-        if(res.success){
-          toast.success(res.message, { description : formatedDateAndTime})
-        }
-        else{
-          toast.error(res.message, { description : formatedDateAndTime })
+        if (res.success) {
+          toast.success(res.message, { description: formatedDateAndTime });
+        } else {
+          toast.error(res.message, { description: formatedDateAndTime });
         }
       })
       .catch(() => {
-        toast.error("something went wrong while confirm email", {description : formatedDateAndTime})
+        toast.error("something went wrong while confirm email", {
+          description: formatedDateAndTime,
+        });
       });
   }, [token, formatedDateAndTime]);
 
   useEffect(() => {
     onSubmit();
   }, [onSubmit]);
+
+  const ResendVerifiactionEmail = async () => {
+    if (!email) {
+      toast.error("Missing Email", { description: formatedDateAndTime });
+    }
+    else{
+      await ResendSignUpVerificationEmail(email)
+      .then((res) => {
+        if(res.success){
+          toast.success(res.message , { description : formatedDateAndTime})
+        }
+        else{
+          toast.error("Something wnet wrong while resend email", { description : formatedDateAndTime})
+        }
+      })
+    }
+  };
 
   return (
     <Card className="w-lg h-auto p-5 items-center">
@@ -65,7 +84,11 @@ const VerificationForm = () => {
         <MdMarkEmailRead className="w-10 h-10 text-blue-600" />
       </CardContent>
       <CardFooter className="w-full flex justify-between">
-        <Button className="text-blue-700" variant={"link"}>
+        <Button
+          onClick={ResendVerifiactionEmail}
+          className="text-blue-700"
+          variant={"link"}
+        >
           Resend
         </Button>
         <Button className="text-blue-700" variant={"link"}>

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { GetVerificationTokenByToken } from "@/utils/getVerificationToken";
 import { CreateResponse } from "@/utils/createResponse";
+import { NextResponse } from "next/server";
 
 export const newVerifiactionAction = async (token : string) => {
    const existingToken = await GetVerificationTokenByToken(token);
@@ -35,5 +36,7 @@ export const newVerifiactionAction = async (token : string) => {
     where : { id : existingToken.id }
    })
 
+   NextResponse.redirect('/dashboard')
    return CreateResponse(true ,null, "Email verified successfully")
+
 }
