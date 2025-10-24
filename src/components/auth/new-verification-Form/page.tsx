@@ -44,7 +44,7 @@ const VerificationForm = () => {
       .then((res) => {
         if (res.success) {
           toast.success(res.message, { description: formatedDateAndTime });
-          router.push("/dashboard"); 
+          router.push("/dashboard");
         } else {
           toast.error(res.message, { description: formatedDateAndTime });
         }
@@ -61,7 +61,7 @@ const VerificationForm = () => {
   }, [onSubmit]);
 
   const handleActionClick = async (type: "resend" | "otp") => {
-    if (cooldown > 0) return; 
+    if (cooldown > 0) return;
 
     if (type === "resend") {
       if (!email) {
@@ -78,15 +78,21 @@ const VerificationForm = () => {
             toast.error("Something went wrong while resending email", {
               description: formatedDateAndTime,
             });
+            setCooldown(60)
           }
         })
         .catch(() => {
           toast.error("Something went wrong while resending email", {
             description: formatedDateAndTime,
           });
+          setCooldown(60)
         });
     } else if (type === "otp") {
-      router.push("/auth/verify-otp")
+      if (!email) {
+        toast.error("Email doen't exist", { description: formatedDateAndTime });
+      } else {
+        setCooldown(60)
+      }
     }
   };
 
@@ -123,7 +129,9 @@ const VerificationForm = () => {
           variant={"link"}
           disabled={cooldown > 0}
         >
-          {cooldown > 0 ? `Verify using OTP (${cooldown}s)` : "Verify using OTP"}
+          {cooldown > 0
+            ? `Verify using OTP (${cooldown}s)`
+            : "Verify using OTP"}
         </Button>
       </CardFooter>
     </Card>
