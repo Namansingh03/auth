@@ -22,7 +22,6 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  otp           Otp[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -65,20 +64,4 @@ model VerificationToken {
   expires DateTime
 
   @@unique([email, token])
-}
-
-model Otp {
-  id        String   @id @default(cuid())
-  code      String
-  expiresAt DateTime
-  used      Boolean  @default(false)
-
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([expiresAt])
 }

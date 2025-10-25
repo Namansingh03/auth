@@ -1,5 +1,22 @@
-version: '3.9'
 services:
+  nextjs:
+    image: node:20
+    container_name: auth-nextjs-app
+    working_dir: /src
+    volumes:
+      - .:/src
+      - /node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres-auth:auth-password@postgres:5432/authdb"
+      REDIS_URL: "redis://redis:6379"
+      NODE_ENV: development
+    command: sh -c "pnpm install && pnpm dev"
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
     image: postgres:latest
     restart: always
@@ -11,5 +28,16 @@ services:
       POSTGRES_DB: authdb
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
 volumes:
   postgres-data:
+  redis-data:

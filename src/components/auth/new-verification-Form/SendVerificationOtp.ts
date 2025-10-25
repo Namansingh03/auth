@@ -1,31 +1,24 @@
-"use server"
+"use server";
 
-import { prisma } from "@/lib/prisma"
-import { CreateResponse } from "@/utils/createResponse"
-import { generateOtp } from "@/utils/getGeneratedOtp";
-import { SendSignUpVerificationOtp } from "@/emails/SendVerificationOtp";
+import crypto from "crypto"
+import { CreateResponse } from "@/utils/createResponse";
+import { SendUpVerificationOtpEmail } from "@/emails/SendVerificationOtpEmail";
+import redis from "@/lib/redis";
 
-export async function SendVerificationOtp(email : string) {
-    const user = await prisma.user.findUnique({ where: { email } });
-    
-    if(!user){
-        return CreateResponse(false , null, "User Nort found")
+export async function SendVerifiactionOtp(email: string) {
+  // 1. Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+ 
+  await redis.set(`otp:${email}`, otp , `EX` , 300)
+
+  // send email to user with otp
+  await SendUpVerificationOtpEmail(email, otp)
+  .then((res) => {
+    if(res.success){
+      return CreateResponse(res.success, null , res.message)
     }
-
-    const otp = generateOtp()
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-
-    await prisma.otp.create({
-        data : {
-            code : otp,
-            expiresAt,
-            createdAt : new Date(Date.now()),
-            userId : user.id
-        }
-    })
-
-    const oTpSent = await SendSignUpVerificationOtp(email , otp)
-
-    return CreateResponse(oTpSent.success, null, oTpSent.message)
-
+    else{
+      return CreateResponse(res.success, null, res.message)
+    }
+  })
 }

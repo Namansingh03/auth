@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useTransition, useState } from "react";
+import React, { useTransition } from "react";
 import {
   Card,
   CardContent,
@@ -32,7 +32,6 @@ import { useRouter } from "next/navigation";
 
 const SignUpForm = () => {
   
-  const router = useRouter()
   const [isPending, startTransition] = useTransition();
   const DateAndTime = getFormattedDateTime()
 

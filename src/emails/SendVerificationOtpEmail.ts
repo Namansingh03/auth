@@ -1,7 +1,7 @@
 import { resend } from "@/lib/resend";
 import { CreateResponse } from "@/utils/createResponse";
 
-export const SendSignUpVerificationOtp = async (email: string, otp: string) => {
+export const SendUpVerificationOtpEmail = async (email: string, otp: string) => {
   try {
     await resend.emails.send({
       from: "onboarding@resend.dev", 
