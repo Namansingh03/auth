@@ -1,5 +1,5 @@
 import { resend } from "@/lib/resend";
-import { CreateResponse } from "@/utils/createResponse";
+import { CreateResponse } from "@/helpers/createResponse";
 
 export const SendUpVerificationOtpEmail = async (email: string, otp: string) => {
   try {

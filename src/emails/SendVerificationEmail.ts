@@ -1,11 +1,12 @@
 import { resend } from "@/lib/resend";
-import { CreateResponse } from "@/utils/createResponse";
+import { createResponse } from "@/helpers/createResponse";
 
 const url = process.env.NEXT_AUTH_URL;
 
 export const SendSignUpVerificationEmail = async (email: string, sessionId: string) => {
 
   const confirmationLink = `${url}/auth/new-verification?sid=${sessionId}`;
+  console.log(confirmationLink)
 
   try {
     await resend.emails.send({
@@ -25,10 +26,10 @@ export const SendSignUpVerificationEmail = async (email: string, sessionId: stri
       `,
     });
 
-    return CreateResponse(true , null, "successfully sent verification email")
+    return createResponse(true , null, "Verification email sent check your email", false)
 
   } catch (error) {
-    return CreateResponse(false, null , "Something went wrong while resending verifiaction email")
+    return createResponse(false, null , "Something went wrong while resending verifiaction email", false)
     console.log(error)
   }
 };

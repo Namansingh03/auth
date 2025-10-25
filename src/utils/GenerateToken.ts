@@ -1,11 +1,10 @@
 import { v4 as uuid } from "uuid"
 import { prisma } from "@/lib/prisma";
-import { GetVerificationTokenByEamil } from "./getVerificationToken";
+import { GetVerificationTokenByEamil } from "../helpers/getVerificationToken";
 
 export const generatedVerificationToken = async (email: string) => {
   const token = uuid();
-  const expires = new Date(new Date().getTime() + 3600 * 1000);
-
+  const expires = new Date(new Date().getTime() + 30 * 60 * 1000);;
   const exisitingToken = await GetVerificationTokenByEamil(email);
 
   if (exisitingToken) {

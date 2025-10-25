@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import {
   Card,
   CardContent,
@@ -25,10 +25,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { SignUpSchema } from "@/schemas/authSchema";
 import SocialsForm from "../Socials/page";
+import { SignUpAction } from "./SignUpAction";
+import { toast } from "sonner";
+import { getFormattedDateTime } from "@/helpers/getFormattedDateandTime";
+import { FormError } from "@/helpers/formError";
+import { useRouter } from "next/navigation";
 
 const SignUpForm = () => {
   
   const [isPending, startTransition] = useTransition();
+  const [error , setError] = useState("")
+  const formatedDateAndTime = getFormattedDateTime()
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
@@ -41,8 +49,23 @@ const SignUpForm = () => {
 
   function onSubmit(formData: z.infer<typeof SignUpSchema>) {
     console.log(formData);
-    startTransition(() => {
-       
+    setError("")
+    startTransition(async () => {
+       await SignUpAction(formData)
+       .then((res) => {
+          if(!res.success && !res.errorResponse){
+            toast.error("Something went wrong", { description : formatedDateAndTime})
+            form.reset()
+          }
+
+          if(!res.success){
+            setError(res.message)
+            form.reset()
+          }
+          else{
+            toast.success(res.message, { description : formatedDateAndTime })
+          }
+       })
     })
   }
 
@@ -120,6 +143,7 @@ const SignUpForm = () => {
                 </FormItem>
               )}
             />
+            {error && <FormError message={error} />}
             <Button
             disabled={isPending} 
             type="submit" 
