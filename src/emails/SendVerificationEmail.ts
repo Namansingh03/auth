@@ -3,9 +3,9 @@ import { CreateResponse } from "@/utils/createResponse";
 
 const url = process.env.NEXT_AUTH_URL;
 
-export const SendSignUpVerificationEmail = async (email: string, token: string) => {
+export const SendSignUpVerificationEmail = async (email: string, sessionId: string) => {
 
-  const confirmationLink = `${url}/auth/new-verification?token=${token}&email=${encodeURIComponent(email)}`;
+  const confirmationLink = `${url}/auth/new-verification?sid=${sessionId}`;
 
   try {
     await resend.emails.send({

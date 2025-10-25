@@ -25,15 +25,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { SignUpSchema } from "@/schemas/authSchema";
 import SocialsForm from "../Socials/page";
-import SignUpAction from "./SignUpAction";
-import { getFormattedDateTime } from "@/utils/getFormattedDateandTime";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 const SignUpForm = () => {
   
   const [isPending, startTransition] = useTransition();
-  const DateAndTime = getFormattedDateTime()
 
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
@@ -47,16 +42,7 @@ const SignUpForm = () => {
   function onSubmit(formData: z.infer<typeof SignUpSchema>) {
     console.log(formData);
     startTransition(() => {
-       SignUpAction(formData)
-       .then((res) => {
-        if(!res.success){
-          toast.error(res.message, { description : DateAndTime})
-        }
-        else{
-          toast.success(res.message, { description : DateAndTime})
-          form.reset()
-        }
-       })
+       
     })
   }
 

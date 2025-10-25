@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useTransition } from "react";
+import React from "react";
 import {
   InputOTP,
   InputOTPGroup,
@@ -16,18 +16,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useSearchParams } from "next/navigation";
-import { VerifyOtp } from "@/app/api/auth/verify-otp/route";
-import { toast } from "sonner";
-import { getFormattedDateTime } from "@/utils/getFormattedDateandTime";
 
 export default function OTPForm() {
 
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email");
   const [otp, setOtp] = React.useState("");
-  const [isPending , startTransition] = useTransition()
-  const FormattedDateandTime = getFormattedDateTime()  
 
   const handleChange = (value: string) => {
     setOtp(value);
@@ -35,22 +27,7 @@ export default function OTPForm() {
 
   // Handle submit
   const handleSubmit = () => {
-    if(email){
-      startTransition(() => {
-         VerifyOtp(email, otp)
-         .then((res) => {
-          if(res.success){
-            toast.success(res.message, { description : FormattedDateandTime })
-          }
-          else{
-            toast.error(res.message, { description : FormattedDateandTime })
-          }
-         })
-      })
-    }
-    else{
-      toast.error("Email not found", { description : FormattedDateandTime })
-    }
+    console.log(otp)
   };
 
   return (
@@ -81,7 +58,6 @@ export default function OTPForm() {
           Didn&apos;t receive the code? <p className="text-blue-400 items-start cursor-pointer hover:text-blue-700"> Resend</p>
         </CardDescription>
         <Button
-        disabled={isPending} 
         onClick={handleSubmit} 
         className="w-3/6">
           Verify OTP
