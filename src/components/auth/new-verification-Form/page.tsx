@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +26,12 @@ const VerificationForm = () => {
   const [timer, setTimer] = useState(60);
   const [resendDisabled, setResendDisabled] = useState(true);
 
-  const onSubmit = useCallback(() => {
+  const hasSubmitted = useRef(false);
+
+  useEffect(() => {
+    if (hasSubmitted.current) return; 
+    hasSubmitted.current = true;
+
     if (!sessionId) {
       toast.error("SessionId is missing");
       return;
@@ -34,23 +39,16 @@ const VerificationForm = () => {
 
     NewVerificationAction(sessionId)
       .then((res) => {
-        if(res.success){
-          toast.success(res.message, { description : formattedDateAndTime })
-        }
-        else{
-          toast.error(res.message , { description : formattedDateAndTime })
+        if (res.success) {
+          toast.success(res.message, { description: formattedDateAndTime });
+        } else {
+          toast.error(res.message, { description: formattedDateAndTime });
         }
       })
       .catch(() => {
-        toast.error("something went wrong while confirming user email");
-      }); 
+        toast.error("Something went wrong while confirming user email");
+      });
   }, [sessionId, formattedDateAndTime]);
-
-  useEffect(() => {
-     
-    onSubmit();
-  }, [onSubmit]);
-
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -76,20 +74,19 @@ const VerificationForm = () => {
   const handleResend = () => {
     setResendDisabled(true);
     setTimer(60);
-   
-    if(!sessionId){
-      toast.error("Session id not found", { description : formattedDateAndTime})
-    }
-    else{
-      ResendSignUpEmail(sessionId)
-      .then((res) => {
-        if(res.success){
-          toast.success(res.message, { description : formattedDateAndTime})
+
+    if (!sessionId) {
+      toast.error("Session id not found", {
+        description: formattedDateAndTime,
+      });
+    } else {
+      ResendSignUpEmail(sessionId).then((res) => {
+        if (res.success) {
+          toast.success(res.message, { description: formattedDateAndTime });
+        } else {
+          toast.error(res.message, { description: formattedDateAndTime });
         }
-        else{
-          toast.error(res.message, { description : formattedDateAndTime})
-        }
-      })
+      });
     }
   };
 
@@ -132,7 +129,7 @@ const VerificationForm = () => {
           className="text-blue-700"
           variant="link"
           onClick={handleVerifyWithOtp}
-          disabled={resendDisabled} 
+          disabled={resendDisabled}
         >
           {resendDisabled ? `Verify using OTP (${timer}s)` : "Verify using OTP"}
         </Button>

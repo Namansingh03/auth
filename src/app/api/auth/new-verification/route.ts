@@ -6,7 +6,7 @@ import { deleteEmailToken, getUserSession } from "@/utils/redisUtils";
 import { GetVerificationTokenByToken } from "@/helpers/getVerificationToken";
 
 export async function NewVerificationAction(sessionId: string) {
-
+  
   const session = await getUserSession(sessionId);
 
   if (!session.success || !session.data) {
