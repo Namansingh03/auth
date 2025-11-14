@@ -5,8 +5,7 @@ import { SignUpSchema } from "@/schemas/auth-schema";
 import { createResponse } from "@/helper/createResponse";
 import bcrypt from "bcrypt"
 import { prisma } from "@/lib/prisma";
-import { generateOtp } from "@/helper/generateOtp";
-import { SendUpVerificationOtpEmail } from "../../../../emails/sendVerificationOtpEmail";
+import { SendOtpViaEmail } from "@/helper/SendOtp";
 
 export async function SignUpAction(data : z.infer<typeof SignUpSchema>) {
     if(!data){
@@ -24,8 +23,6 @@ export async function SignUpAction(data : z.infer<typeof SignUpSchema>) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
-    const otp = await generateOtp()
-    const hashedOtp = await bcrypt.hash(otp, 10)
 
     await prisma.user.create({
         data : {
@@ -35,15 +32,7 @@ export async function SignUpAction(data : z.infer<typeof SignUpSchema>) {
         }
     })
 
-    await prisma.verificationOtp.create({
-        data : {
-            email,
-            otp : hashedOtp,
-            expires : new Date(Date.now() + 10 * 60 * 1000)
-        }
-    })
+    const res = await SendOtpViaEmail(email)
 
-    const response = await SendUpVerificationOtpEmail(email, otp)
-
-    return createResponse(response.success, response.data, response.message, true)
+    return createResponse(res.success, res.data, res.message, res.errorResponse)
 }

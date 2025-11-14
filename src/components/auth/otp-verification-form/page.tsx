@@ -21,6 +21,7 @@ import { VerifyOtp } from "./verifyOtp";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { getFormattedDateTime } from "@/helper/fromatedDateAndTime";
+import { SendOtpViaEmail } from "@/helper/SendOtp";
 
 export default function OTPForm() {
   const router = useRouter();
@@ -46,9 +47,29 @@ export default function OTPForm() {
     return () => clearInterval(intervalId);
   }, [cooldown]);
 
+  const handleResend = () => {
+    if (cooldown > 0) return;
+
+    setError("");
+    setCooldown(60);
+
+    startTransition(async () => {
+      await SendOtpViaEmail(email).then((res) => {
+        if (!res.success) {
+          if (!res.errorResponse) {
+            setError(res.message);
+          } else {
+            toast.error(res.message, { description: formatedDateAndTime });
+          }
+        } else {
+          toast.success(res.message, { description: formatedDateAndTime });
+        }
+      });
+    });
+  };
+
   const handleSubmit = () => {
     if (cooldown > 0) return;
-    console.log(otp);
     setError("");
     startTransition(async () => {
       await VerifyOtp(otp, email).then((res) => {
@@ -70,6 +91,7 @@ export default function OTPForm() {
   };
 
   const isButtonDisabled = isPending || cooldown > 0 || otp.length !== 6;
+  const canResend = cooldown === 0;
 
   return (
     <Card className="w-lg flex flex-col items-center justify-center p-10">
@@ -82,6 +104,9 @@ export default function OTPForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="w-full flex flex-col items-center justify-center gap-y-3">
+        <CardDescription>
+          {error && <p className="text-sm text-red-500">{error}</p>}
+        </CardDescription>
         <InputOTP maxLength={6} value={otp} onChange={handleChange}>
           <InputOTPGroup className="*:border *:border-slate-400 *:w-13 *:h-15">
             <InputOTPSlot index={0} />
@@ -95,27 +120,32 @@ export default function OTPForm() {
             <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
+
         <CardDescription className="w-full flex justify-center items-center gap-x-1">
-          Didn&apos;t receive the code?{" "}
-          <p className="text-blue-400 items-start cursor-pointer hover:text-blue-700">
-            {" "}
-            Resend
+          Didn&apos;t receive the code?
+          <p
+            onClick={canResend ? handleResend : undefined}
+            className={
+              canResend
+                ? "text-blue-400 items-start cursor-pointer hover:text-blue-700"
+                : "text-slate-400 items-start cursor-not-allowed"
+            }
+          >
+            {canResend ? " Resend" : ` Resend in ${formatCooldown(cooldown)}`}
           </p>
         </CardDescription>
+
         <Button
           onClick={handleSubmit}
           disabled={isButtonDisabled}
           className="w-3/6"
         >
           {cooldown > 0
-            ? `Wait ${formatCooldown(cooldown)}s`
+            ? `Wait ${formatCooldown(cooldown)}`
             : isPending
             ? "Verifying..."
             : "Verify OTP"}
         </Button>
-          <CardDescription>
-            {error && <p className="text-sm text-red-500">{error}</p> }
-          </CardDescription>
       </CardContent>
       <CardFooter className="w-full flex items-center justify-center">
         <p className="text-center *:not-first:cursor-pointer text-slate-600 text-sm">
