@@ -1,17 +1,4 @@
 services:
-
-  postgres:
-    image: postgres:15
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: db
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
   redis:
     image: redis:latest
     container_name: redis
@@ -22,5 +9,4 @@ services:
       - redis-data:/data
 
 volumes:
-  postgres-data:
   redis-data:

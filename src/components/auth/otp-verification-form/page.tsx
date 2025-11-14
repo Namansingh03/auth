@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState, useTransition} from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import {
   InputOTP,
   InputOTPGroup,
@@ -16,48 +16,60 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FormError } from "@/helper/formError";
+import { formatCooldown } from "@/helper/formatCooldown";
 import { VerifyOtp } from "./verifyOtp";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { getFormattedDateTime } from "@/helper/fromatedDateAndTime";
 
 export default function OTPForm() {
-
+  const router = useRouter();
+  const params = useSearchParams();
+  const email = params.get("email");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const formatedDateAndTime = getFormattedDateTime();
   const [isPending, startTransition] = useTransition();
-  const params = useSearchParams()
-  const email = params.get('email')
-  const formatedDateAndTime = getFormattedDateTime()
-  const router = useRouter()
 
   const handleChange = (value: string) => {
     setOtp(value);
   };
 
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const intervalId = setInterval(() => {
+      setCooldown((prev) => (prev > 1 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [cooldown]);
+
   const handleSubmit = () => {
-    console.log(otp)
-    setError("")
+    if (cooldown > 0) return;
+    console.log(otp);
+    setError("");
     startTransition(async () => {
-      await VerifyOtp(otp, email)
-      .then((res) => {
-        if(!res.success){
-          if(!res.errorResponse){
-            setError(res.message)
-            setOtp("")
+      await VerifyOtp(otp, email).then((res) => {
+        if (!res.success) {
+          if (!res.errorResponse) {
+            setError(res.message);
+            setOtp("");
+            setCooldown(10);
+          } else {
+            toast(res.message, { description: formatedDateAndTime });
+            setCooldown(600);
           }
-          else{
-            toast(res.message, { description : formatedDateAndTime })
-          }
+        } else {
+          toast(res.message, { description: formatedDateAndTime });
+          router.push("/dashboard");
         }
-        else{
-          toast(res.message, { description : formatedDateAndTime })
-          router.push("/dashboard")
-        }
-      })
-    })
+      });
+    });
   };
+
+  const isButtonDisabled = isPending || cooldown > 0 || otp.length !== 6;
 
   return (
     <Card className="w-lg flex flex-col items-center justify-center p-10">
@@ -84,21 +96,39 @@ export default function OTPForm() {
           </InputOTPGroup>
         </InputOTP>
         <CardDescription className="w-full flex justify-center items-center gap-x-1">
-          Didn&apos;t receive the code? <p className="text-blue-400 items-start cursor-pointer hover:text-blue-700"> Resend</p>
-        </CardDescription>
-        <CardDescription>
-          {error && <FormError message={error} />}
+          Didn&apos;t receive the code?{" "}
+          <p className="text-blue-400 items-start cursor-pointer hover:text-blue-700">
+            {" "}
+            Resend
+          </p>
         </CardDescription>
         <Button
-        onClick={handleSubmit}
-        disabled={isPending} 
-        className="w-3/6">
-          Verify OTP
+          onClick={handleSubmit}
+          disabled={isButtonDisabled}
+          className="w-3/6"
+        >
+          {cooldown > 0
+            ? `Wait ${formatCooldown(cooldown)}s`
+            : isPending
+            ? "Verifying..."
+            : "Verify OTP"}
         </Button>
+          <CardDescription>
+            {error && <p className="text-sm text-red-500">{error}</p> }
+          </CardDescription>
       </CardContent>
       <CardFooter className="w-full flex items-center justify-center">
-         <p className="text-center *:not-first:cursor-pointer text-slate-600 text-sm">By clicking continue, you agree to our <a href="#" className="underline text-blue-700 cursor-pointer">Terms of Service</a>{" "}
-        and <a className="underline text-blue-700 cursor-pointer" href="#">Privacy Policy</a>.</p>
+        <p className="text-center *:not-first:cursor-pointer text-slate-600 text-sm">
+          By clicking continue, you agree to our{" "}
+          <a href="#" className="underline text-blue-700 cursor-pointer">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a className="underline text-blue-700 cursor-pointer" href="#">
+            Privacy Policy
+          </a>
+          .
+        </p>
       </CardFooter>
     </Card>
   );
