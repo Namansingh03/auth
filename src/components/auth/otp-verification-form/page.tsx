@@ -32,6 +32,8 @@ export default function OTPForm() {
   const [cooldown, setCooldown] = useState(0);
   const formatedDateAndTime = getFormattedDateTime();
   const [isPending, startTransition] = useTransition();
+  
+  console.log(email)
 
   const handleChange = (value: string) => {
     setOtp(value);
@@ -79,11 +81,11 @@ export default function OTPForm() {
             setOtp("");
             setCooldown(10);
           } else {
-            toast(res.message, { description: formatedDateAndTime });
+            toast.error(res.message, { description: formatedDateAndTime });
             setCooldown(600);
           }
         } else {
-          toast(res.message, { description: formatedDateAndTime });
+          toast.success(res.message, { description: formatedDateAndTime });
           router.push("/dashboard");
         }
       });
